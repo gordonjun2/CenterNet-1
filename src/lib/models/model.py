@@ -13,12 +13,31 @@ from .networks.pose_dla_dcn import get_pose_net as get_dla_dcn
 from .networks.resnet_dcn import get_pose_net as get_pose_net_dcn
 from .networks.large_hourglass import get_large_hourglass_net
 
+from .networks.large_hourglass_all_dense import get_large_hourglass_net_all_dense
+from .networks.large_hourglass_resdense import get_large_hourglass_net_resdense
+from .networks.large_hourglass_skip3 import get_large_hourglass_net_skip3
+from .networks.large_hourglass_skip_dense import get_large_hourglass_net_skip_dense
+from .networks.small_hourglass import get_small_hourglass_net
+from .networks.small_hourglass_all_dense import get_small_hourglass_net_all_dense
+from .networks.small_hourglass_resdense import get_small_hourglass_net_resdense
+from .networks.small_hourglass_skip3 import get_small_hourglass_net_skip3
+from .networks.small_hourglass_skip_dense import get_small_hourglass_net_skip_dense
+
 _model_factory = {
   'res': get_pose_net, # default Resnet with deconv
   'dlav0': get_dlav0, # default DLAup
   'dla': get_dla_dcn,
   'resdcn': get_pose_net_dcn,
-  'hourglass': get_large_hourglass_net,
+  'hourglass-104': get_large_hourglass_net,
+  'hourglass-52': get_small_hourglass_net,
+  'hourglass-104-skip3': get_large_hourglass_net_skip3,
+  'hourglass-52-skip3': get_small_hourglass_net_skip3,
+  'hourglass-104-skip-dense': get_large_hourglass_net_skip_dense,
+  'hourglass-52-skip-dense': get_small_hourglass_net_skip_dense,
+  'hourglass-104-resdense': get_large_hourglass_net_resdense,
+  'hourglass-52-resdense': get_small_hourglass_net_resdense,
+  'hourglass-104-all-dense': get_large_hourglass_net_all_dense,
+  'hourglass-52-all-dense': get_small_hourglass_net_all_dense
 }
 
 def create_model(arch, heads, head_conv):
