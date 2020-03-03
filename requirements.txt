@@ -24,7 +24,7 @@ opencv-python==4.2.0.32
 Pillow==6.1.0
 progress==1.5
 protobuf==3.11.2
-pycocotools==2.0
+
 pyparsing==2.4.6
 python-dateutil==2.8.1
 scipy==1.4.1
