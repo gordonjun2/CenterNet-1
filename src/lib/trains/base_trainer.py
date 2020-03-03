@@ -41,7 +41,7 @@ class BaseTrainer(object):
         if isinstance(v, torch.Tensor):
           state[k] = v.to(device=device, non_blocking=True)
 
-  def run_epoch(self, phase, epoch, data_loader):
+  def run_epoch(self, phase, epoch, data_loader, iteration, tb):
     model_with_loss = self.model_with_loss
     if phase == 'train':
       model_with_loss.train()
@@ -72,6 +72,7 @@ class BaseTrainer(object):
         self.optimizer.zero_grad()
         loss.backward()
         self.optimizer.step()
+        iteration = iteration + 1
       batch_time.update(time.time() - end)
       end = time.time()
 
@@ -81,6 +82,12 @@ class BaseTrainer(object):
       for l in avg_loss_stats:
         avg_loss_stats[l].update(
           loss_stats[l].mean().item(), batch['input'].size(0))
+
+        if phase == 'train':
+          tb.add_scalar('Train ' + str(l) + ' vs Iteration', avg_loss_stats[l].avg, iteration)
+        else:
+          tb.add_scalar('Validation ' + str(l) + ' vs Epoch', avg_loss_stats[l].avg, epoch)
+
         Bar.suffix = Bar.suffix + '|{} {:.4f} '.format(l, avg_loss_stats[l].avg)
       if not opt.hide_data_time:
         Bar.suffix = Bar.suffix + '|Data {dt.val:.3f}s({dt.avg:.3f}s) ' \
@@ -101,7 +108,7 @@ class BaseTrainer(object):
     bar.finish()
     ret = {k: v.avg for k, v in avg_loss_stats.items()}
     ret['time'] = bar.elapsed_td.total_seconds() / 60.
-    return ret, results
+    return ret, results, iteration
   
   def debug(self, batch, output, iter_id):
     raise NotImplementedError
@@ -112,8 +119,8 @@ class BaseTrainer(object):
   def _get_losses(self, opt):
     raise NotImplementedError
   
-  def val(self, epoch, data_loader):
-    return self.run_epoch('val', epoch, data_loader)
+  def val(self, epoch, data_loader, iteration, tb):
+    return self.run_epoch('val', epoch, data_loader, iteration, tb)
 
-  def train(self, epoch, data_loader):
-    return self.run_epoch('train', epoch, data_loader)
+  def train(self, epoch, data_loader, iteration, tb):
+    return self.run_epoch('train', epoch, data_loader, iteration, tb)

@@ -14,7 +14,7 @@ from utils.debugger import Debugger
 
 
 class BaseDetector(object):
-  def __init__(self, opt):
+  def __init__(self, opt, best_model_dir = None):
     if opt.gpus[0] >= 0:
       opt.device = torch.device('cuda')
     else:
@@ -22,7 +22,10 @@ class BaseDetector(object):
     
     print('Creating model...')
     self.model = create_model(opt.arch, opt.heads, opt.head_conv)
-    self.model = load_model(self.model, opt.load_model)
+    if len(opt.load_model) != 0:
+      self.model = load_model(self.model, opt.load_model)
+    else:
+      self.model = load_model(self.model, best_model_dir)
     self.model = self.model.to(opt.device)
     self.model.eval()
 

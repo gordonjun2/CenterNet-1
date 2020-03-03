@@ -79,10 +79,14 @@ def prefetch_test(opt):
   bar.finish()
   dataset.run_eval(results, opt.save_dir)
 
-def test(opt):
+def test(opt, best_model_dir, tb = None):
   os.environ['CUDA_VISIBLE_DEVICES'] = opt.gpus_str
+  
+  if opt.dataset == 'coco' and tb is not None:
+    Dataset = dataset_factory['coco_tensorboard_added']
+  else:
+    Dataset = dataset_factory[opt.dataset]
 
-  Dataset = dataset_factory[opt.dataset]
   opt = opts().update_dataset_info_and_set_heads(opt, Dataset)
   print(opt)
   Logger(opt)
@@ -90,7 +94,8 @@ def test(opt):
   
   split = 'val' if not opt.trainval else 'test'
   dataset = Dataset(opt, split)
-  detector = Detector(opt)
+  print(best_model_dir)
+  detector = Detector(opt, best_model_dir)
 
   results = {}
   num_iters = len(dataset)
@@ -116,7 +121,13 @@ def test(opt):
       Bar.suffix = Bar.suffix + '|{} {:.3f} '.format(t, avg_time_stats[t].avg)
     bar.next()
   bar.finish()
-  dataset.run_eval(results, opt.save_dir)
+
+  if tb is None:
+    dataset.run_eval(results, opt.save_dir)
+  else:
+    stats  = dataset.run_eval(results, opt.save_dir)
+
+    return stats
 
 if __name__ == '__main__':
   opt = opts().parse()
