@@ -34,11 +34,20 @@ RUN apt-get update && apt-get install -y \
     libsm6 libxrender1 libfontconfig1 python3.6-tk && \
     rm -rf /var/lib/apt/lists/*
 
-RUN sudo git clone https://github.com/gordonjun2/CenterNet-1 /home/root/
+RUN sudo git clone https://github.com/gordonjun2/CenterNet-1.git /home/root/CenterNet-1
 
 WORKDIR /home/root/CenterNet-1
 
-RUN pip3 install -r requirements.txt
+RUN pip install -r requirements.txt
+
+    # Cudatoolkit 10.1
+RUN sudo wget https://anaconda.org/anaconda/cudatoolkit/10.1.243/download/linux-64/cudatoolkit-10.1.243-h6bb024c_0.tar.bz2 && \
+    sudo tar -xjf cudatoolkit-10.1.243-h6bb024c_0.tar.bz2 -C /usr/bin && \
+    sudo rm cudatoolkit-10.1.243-h6bb024c_0.tar.bz2
+
+WORKDIR /home/root/CenterNet-1/cocoapi/PythonAPI
+
+RUN python3 setup.py build_ext --inplace
 
 WORKDIR /home/root/CenterNet-1/src/lib/models/networks/DCNv2
 
