@@ -14,6 +14,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 
+import math
 from matplotlib import pyplot as plt
 
 class convolution(nn.Module):
@@ -88,6 +89,78 @@ def make_layer_revr(k, inp_dim, out_dim, modules, layer=convolution, **kwargs):
     layers.append(layer(k, inp_dim, out_dim, **kwargs))
     return nn.Sequential(*layers)
 
+def make_up_layer(modules, dim):
+    growth_rate = dim / 2
+    #nb_layers = 1           # Hyperparameters, but treat as a constant first
+    reduction = 0.5         # Hyperparameters, but treat as a constant first
+    dropRate = 0            # Hyperparameters, but treat as a constant first
+    depth = 10
+    in_planes = 2 * growth_rate
+    n = (depth - 4) / 3
+    n = int(n)
+    layers = []
+
+    for _ in range(modules):
+        for i in range(n):
+            layers.append(DenseBlock(nb_layers = i, in_planes = in_planes, growth_rate = growth_rate, block = BasicBlock, dropRate = dropRate))  
+        in_planes = int(in_planes+n*growth_rate)  
+        layers.append(TransitionBlock(in_planes = in_planes, out_planes = int(math.floor(in_planes*reduction)), dropRate = dropRate))
+        in_planes = int(math.floor(in_planes*reduction))
+    
+    return nn.Sequential(*layers)
+
+def make_hg_layer(kernel, mod, dim0, dim1, nDenselayer):
+    #nDenselayer = 2             # Hyperparameters, but treat as a constant first
+    growthRate = dim0 // 2        # Hyperparameters, but treat as a constant first
+    nChannels = int(growthRate * 2)
+    layers = []
+    nChannels_def = nChannels
+    nChannels_ = nChannels
+
+    for _ in range(mod):
+        for i in range(nDenselayer):
+            layers.append(RDB(nChannels = nChannels_, nDenselayer = nDenselayer, growthRate = growthRate))
+            nChannels_ += growthRate
+        layers.append(nn.Conv2d(nChannels_ - growthRate, nChannels_def, kernel_size=1, padding=0, bias=False))
+        layers.append(nn.Conv2d(nChannels_def, dim1, kernel_size=1, padding=0, bias=True))
+        layers.append(nn.Conv2d(dim1, dim1, kernel_size=3, padding=1, bias=True))         # global feature fusion (GFF)
+        nChannels_ = dim1
+
+    return nn.Sequential(*layers) 
+
+class make_dense(nn.Module):
+    def __init__(self, nChannels, growthRate, kernel_size=3):
+        super(make_dense, self).__init__()
+        self.conv = nn.Conv2d(int(nChannels), int(growthRate), kernel_size=kernel_size, padding=(kernel_size-1)//2, bias=False)
+
+    def forward(self, x):
+        out = nn.functional.relu(self.conv(x))
+        out = torch.cat((x, out), 1)
+        return out
+
+# Residual dense block (RDB) architecture
+class RDB(nn.Module):
+    def __init__(self, nChannels, nDenselayer, growthRate):
+        super(RDB, self).__init__()
+        self.layer = self._make_layer(nChannels, nDenselayer, growthRate)
+    def _make_layer(self, nChannels, nDenselayer, growthRate):
+        #modules = []
+        #nChannels_def = nChannels
+        #nChannels_ = nChannels
+        #for i in range(nDenselayer):    
+        module = make_dense(nChannels, growthRate)
+
+        #modules.append(nn.Conv2d(nChannels_, nChannels_def, kernel_size=1, padding=0, bias=False))
+        #self.dense_layers = nn.Sequential(*modules)    
+        #self.conv_1x1 = nn.Conv2d(nChannels_, nChannels, kernel_size=1, padding=0, bias=False)
+        return module
+
+    def forward(self, x):
+        #out = self.dense_layers(x)
+        #out = self.conv_1x1(out)
+        #out = out + x
+        return self.layer(x)
+
 class MergeUp(nn.Module):
     def forward(self, up1, up2):
         return up1 + up2
@@ -120,7 +193,7 @@ class kp_module(nn.Module):
     def __init__(
         self, n, dims, modules, layer=residual,
         make_up_layer=make_layer, make_low_layer=make_layer,
-        make_hg_layer=make_layer, make_hg_layer_revr=make_layer_revr,
+        make_hg_layer=make_hg_layer, make_hg_layer_revr=make_layer_revr,
         make_pool_layer=make_pool_layer, make_unpool_layer=make_unpool_layer,
         make_merge_layer=make_merge_layer, **kwargs
     ):
@@ -139,10 +212,14 @@ class kp_module(nn.Module):
             layer=layer, **kwargs
         )  
         self.max1 = make_pool_layer(curr_dim)
-        self.low1 = make_hg_layer(
-            3, curr_dim, next_dim, curr_mod,
-            layer=layer, **kwargs
-        )
+        
+        #self.low1 = make_hg_layer(
+        #    3, curr_dim, next_dim, curr_mod,
+        #    layer=layer, **kwargs
+        #)
+
+        self.low1 = make_hg_layer(kernel = 3, mod = curr_mod, dim0 = curr_dim, dim1 = next_dim, nDenselayer = 1)                  # RDB here
+
         self.low2 = kp_module(
             n - 1, dims[1:], modules[1:], layer=layer, 
             make_up_layer=make_up_layer, 
@@ -167,66 +244,13 @@ class kp_module(nn.Module):
         self.merge = make_merge_layer(curr_dim)
 
     def forward(self, x):
-        up1  = self.up1(x)
+        #up1  = self.up1(x)
         max1 = self.max1(x)
-
-        ##### See Feature Map Here #####
-        feature_map = max1.cpu().detach().numpy()
-        print("max1 Shape:", feature_map.shape)
-        feature_map = np.sum(feature_map[0], axis = 0)
-        plt.imshow(feature_map/feature_map[1])
-        plt.show()
-        ################################
-
         low1 = self.low1(max1)
-
-        ##### See Feature Map Here #####
-        feature_map = low1.cpu().detach().numpy()
-        print("low1 Shape:", feature_map.shape)
-        feature_map = np.sum(feature_map[0], axis = 0)
-        plt.imshow(feature_map/feature_map[1])
-        plt.show()
-        ################################
-
         low2 = self.low2(low1)
-
-        ##### See Feature Map Here #####
-        feature_map = low2.cpu().detach().numpy()
-        print("low2 Shape:", feature_map.shape)
-        feature_map = np.sum(feature_map[0], axis = 0)
-        plt.imshow(feature_map/feature_map[1])
-        plt.show()
-        ################################
-
         low3 = self.low3(low2)
-
-        ##### See Feature Map Here #####
-        feature_map = low3.cpu().detach().numpy()
-        print("low3 Shape:", feature_map.shape)
-        feature_map = np.sum(feature_map[0], axis = 0)
-        plt.imshow(feature_map/feature_map[1])
-        plt.show()
-        ################################
-
         up2  = self.up2(low3)
-
-        ##### See Feature Map Here #####
-        feature_map = up2.cpu().detach().numpy()
-        print("up2 Shape:", feature_map.shape)
-        feature_map = np.sum(feature_map[0], axis = 0)
-        plt.imshow(feature_map/feature_map[1])
-        plt.show()
-        ################################
-
-        ##### See Feature Map Here #####
-        feature_map = self.merge(up1, up2).cpu().detach().numpy()
-        print("merged Shape:", feature_map.shape)
-        feature_map = np.sum(feature_map[0], axis = 0)
-        plt.imshow(feature_map/feature_map[1])
-        plt.show()
-        ################################
-
-        return self.merge(up1, up2)
+        return self.merge(x, up2)
 
 class exkp(nn.Module):
     def __init__(
@@ -235,7 +259,7 @@ class exkp(nn.Module):
         make_cnv_layer=make_cnv_layer, make_heat_layer=make_kp_layer,
         make_tag_layer=make_kp_layer, make_regr_layer=make_kp_layer,
         make_up_layer=make_layer, make_low_layer=make_layer, 
-        make_hg_layer=make_layer, make_hg_layer_revr=make_layer_revr,
+        make_hg_layer=make_hg_layer, make_hg_layer_revr=make_layer_revr,
         make_pool_layer=make_pool_layer, make_unpool_layer=make_unpool_layer,
         make_merge_layer=make_merge_layer, make_inter_layer=make_inter_layer, 
         kp_layer=residual
@@ -307,14 +331,6 @@ class exkp(nn.Module):
 
     def forward(self, image):
         # print('image shape', image.shape)
-
-        ##### See Feature Map Here #####
-        input = image.cpu().detach().numpy()
-        input = np.sum(input[0], axis = 0)
-        plt.imshow(input/input[1])
-        plt.show()
-        ################################
-
         inter = self.pre(image)
         outs  = []
 
@@ -344,7 +360,7 @@ def make_hg_layer(kernel, dim0, dim1, mod, layer=convolution, **kwargs):
 
 
 class HourglassNet(exkp):
-    def __init__(self, heads, num_stacks=1):
+    def __init__(self, heads, num_stacks=2):
         n       = 5
         dims    = [256, 256, 384, 384, 384, 512]
         modules = [2, 2, 2, 2, 2, 4]
@@ -358,6 +374,6 @@ class HourglassNet(exkp):
             kp_layer=residual, cnv_dim=256
         )
 
-def get_small_hourglass_net(num_layers, heads, head_conv):
-  model = HourglassNet(heads, 1)
+def get_large_hourglass_net_resdense_skip_none(num_layers, heads, head_conv):
+  model = HourglassNet(heads, 2)
   return model

@@ -14,7 +14,12 @@ import numpy as np
 import torch
 import torch.nn as nn
 
-from matplotlib import pyplot as plt
+up1_a = None
+up1_b = None
+up1_c = None
+up1_d = None
+up1_e = None
+count = 0
 
 class convolution(nn.Module):
     def __init__(self, k, inp_dim, out_dim, stride=1, with_bn=True):
@@ -167,66 +172,62 @@ class kp_module(nn.Module):
         self.merge = make_merge_layer(curr_dim)
 
     def forward(self, x):
-        up1  = self.up1(x)
-        max1 = self.max1(x)
+        global up1_a
+        global up1_b
+        global up1_c
+        global up1_d
+        global up1_e
+        global count
 
-        ##### See Feature Map Here #####
-        feature_map = max1.cpu().detach().numpy()
-        print("max1 Shape:", feature_map.shape)
-        feature_map = np.sum(feature_map[0], axis = 0)
-        plt.imshow(feature_map/feature_map[1])
-        plt.show()
-        ################################
+        if count != 1:
+            up1  = self.up1(x)
 
-        low1 = self.low1(max1)
+            if up1_a == None:
+                up1_a = up1
+            elif up1_b == None:
+                up1_b = up1
+            elif up1_c == None:
+                up1_c = up1
+            elif up1_d == None:
+                up1_d = up1
+            else:
+                up1_e = up1
 
-        ##### See Feature Map Here #####
-        feature_map = low1.cpu().detach().numpy()
-        print("low1 Shape:", feature_map.shape)
-        feature_map = np.sum(feature_map[0], axis = 0)
-        plt.imshow(feature_map/feature_map[1])
-        plt.show()
-        ################################
+            max1 = self.max1(x)
+            low1 = self.low1(max1)
+            low2 = self.low2(low1)
+            low3 = self.low3(low2)
+            up2  = self.up2(low3)
 
-        low2 = self.low2(low1)
+            return self.merge(up1, up2)
 
-        ##### See Feature Map Here #####
-        feature_map = low2.cpu().detach().numpy()
-        print("low2 Shape:", feature_map.shape)
-        feature_map = np.sum(feature_map[0], axis = 0)
-        plt.imshow(feature_map/feature_map[1])
-        plt.show()
-        ################################
+        else:
+            max1 = self.max1(x)
+            low1 = self.low1(max1)
+            low2 = self.low2(low1)
+            low3 = self.low3(low2)
+            up2  = self.up2(low3)
 
-        low3 = self.low3(low2)
-
-        ##### See Feature Map Here #####
-        feature_map = low3.cpu().detach().numpy()
-        print("low3 Shape:", feature_map.shape)
-        feature_map = np.sum(feature_map[0], axis = 0)
-        plt.imshow(feature_map/feature_map[1])
-        plt.show()
-        ################################
-
-        up2  = self.up2(low3)
-
-        ##### See Feature Map Here #####
-        feature_map = up2.cpu().detach().numpy()
-        print("up2 Shape:", feature_map.shape)
-        feature_map = np.sum(feature_map[0], axis = 0)
-        plt.imshow(feature_map/feature_map[1])
-        plt.show()
-        ################################
-
-        ##### See Feature Map Here #####
-        feature_map = self.merge(up1, up2).cpu().detach().numpy()
-        print("merged Shape:", feature_map.shape)
-        feature_map = np.sum(feature_map[0], axis = 0)
-        plt.imshow(feature_map/feature_map[1])
-        plt.show()
-        ################################
-
-        return self.merge(up1, up2)
+            if up1_e != None:
+                merged = self.merge(up1_e, up2)
+                up1_e = None
+                return merged
+            elif up1_d != None:
+                merged = self.merge(up1_d, up2)
+                up1_d = None
+                return merged
+            elif up1_c != None:
+                merged = self.merge(up1_c, up2)
+                up1_c = None
+                return merged
+            elif up1_b != None:
+                merged = self.merge(up1_b, up2)
+                up1_b = None
+                return merged
+            else:
+                merged = self.merge(up1_a, up2)
+                up1_a = None
+                return merged
 
 class exkp(nn.Module):
     def __init__(
@@ -307,21 +308,15 @@ class exkp(nn.Module):
 
     def forward(self, image):
         # print('image shape', image.shape)
-
-        ##### See Feature Map Here #####
-        input = image.cpu().detach().numpy()
-        input = np.sum(input[0], axis = 0)
-        plt.imshow(input/input[1])
-        plt.show()
-        ################################
-
         inter = self.pre(image)
         outs  = []
+        global count
 
         for ind in range(self.nstack):
             kp_, cnv_  = self.kps[ind], self.cnvs[ind]
             kp  = kp_(inter)
             cnv = cnv_(kp)
+            count = count + 1
 
             out = {}
             for head in self.heads:
@@ -344,7 +339,7 @@ def make_hg_layer(kernel, dim0, dim1, mod, layer=convolution, **kwargs):
 
 
 class HourglassNet(exkp):
-    def __init__(self, heads, num_stacks=1):
+    def __init__(self, heads, num_stacks=2):
         n       = 5
         dims    = [256, 256, 384, 384, 384, 512]
         modules = [2, 2, 2, 2, 2, 4]
@@ -358,6 +353,6 @@ class HourglassNet(exkp):
             kp_layer=residual, cnv_dim=256
         )
 
-def get_small_hourglass_net(num_layers, heads, head_conv):
-  model = HourglassNet(heads, 1)
+def get_large_hourglass_net_linked_reduced(num_layers, heads, head_conv):
+  model = HourglassNet(heads, 2)
   return model

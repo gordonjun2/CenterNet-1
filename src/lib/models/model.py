@@ -17,11 +17,17 @@ from .networks.large_hourglass_all_dense import get_large_hourglass_net_all_dens
 from .networks.large_hourglass_resdense import get_large_hourglass_net_resdense
 from .networks.large_hourglass_skip3 import get_large_hourglass_net_skip3
 from .networks.large_hourglass_skip_dense import get_large_hourglass_net_skip_dense
+from .networks.large_hourglass_resdense_skip_none import get_large_hourglass_net_resdense_skip_none
+from .networks.large_hourglass_linked_v1 import get_large_hourglass_net_linked_v1
+from .networks.large_hourglass_linked_v2 import get_large_hourglass_net_linked_v2
+from .networks.large_hourglass_linked_reduced import get_large_hourglass_net_linked_reduced
+
 from .networks.small_hourglass import get_small_hourglass_net
 from .networks.small_hourglass_all_dense import get_small_hourglass_net_all_dense
 from .networks.small_hourglass_resdense import get_small_hourglass_net_resdense
 from .networks.small_hourglass_skip3 import get_small_hourglass_net_skip3
 from .networks.small_hourglass_skip_dense import get_small_hourglass_net_skip_dense
+from .networks.small_hourglass_resdense_skip_none import get_small_hourglass_net_resdense_skip_none
 
 _model_factory = {
   'res': get_pose_net, # default Resnet with deconv
@@ -37,7 +43,12 @@ _model_factory = {
   'hourglass-104-resdense': get_large_hourglass_net_resdense,
   'hourglass-52-resdense': get_small_hourglass_net_resdense,
   'hourglass-104-all-dense': get_large_hourglass_net_all_dense,
-  'hourglass-52-all-dense': get_small_hourglass_net_all_dense
+  'hourglass-52-all-dense': get_small_hourglass_net_all_dense,
+  'hourglass-104-resdense-skip-none': get_large_hourglass_net_resdense_skip_none,
+  'hourglass-52-resdense-skip-none': get_small_hourglass_net_resdense_skip_none,
+  'hourglass-104-linked-v1': get_large_hourglass_net_linked_v1,
+  'hourglass-104-linked-v2': get_large_hourglass_net_linked_v2,
+  'hourglass-104-linked-reduced': get_large_hourglass_net_linked_reduced
 }
 
 def create_model(arch, heads, head_conv):

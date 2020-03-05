@@ -15,6 +15,7 @@ import torch
 import torch.nn as nn
 
 import math
+from matplotlib import pyplot as plt
 
 class convolution(nn.Module):
     def __init__(self, k, inp_dim, out_dim, stride=1, with_bn=True):
@@ -125,7 +126,26 @@ def make_hg_layer(kernel, mod, dim0, dim1, nDenselayer):
         layers.append(nn.Conv2d(dim1, dim1, kernel_size=3, padding=1, bias=True))         # global feature fusion (GFF)
         nChannels_ = dim1
 
-    return nn.Sequential(*layers) 
+    return nn.Sequential(*layers)
+
+# def make_hg_layer_revr(kernel, mod, dim0, dim1, nDenselayer):
+#     #nDenselayer = 2             # Hyperparameters, but treat as a constant first
+#     growthRate = dim0 // 2        # Hyperparameters, but treat as a constant first
+#     nChannels = int(growthRate * 2)
+#     layers = []
+#     nChannels_def = nChannels
+#     nChannels_ = nChannels
+
+#     for _ in range(mod):
+#         for i in range(nDenselayer):
+#             layers.append(RDB(nChannels = nChannels_, nDenselayer = nDenselayer, growthRate = growthRate))
+#             nChannels_ += growthRate
+#         #layers.append(nn.Conv2d(nChannels_, nChannels_def, kernel_size=1, padding=0, bias=False))
+#         #layers.append(nn.Conv2d(nChannels_def, dim1, kernel_size=1, padding=0, bias=True))
+#         layers.append(nn.Conv2d(nChannels_, dim1, kernel_size=3, padding=1, bias=True))         # global feature fusion (GFF)
+#         nChannels_ = dim1
+
+#     return nn.Sequential(*layers) 
 
 class make_dense(nn.Module):
     def __init__(self, nChannels, growthRate, kernel_size=3):
@@ -210,6 +230,7 @@ class kp_module(nn.Module):
             3, curr_dim, curr_dim, curr_mod, 
             layer=layer, **kwargs
         )  
+
         self.max1 = make_pool_layer(curr_dim)
         #self.low1 = make_hg_layer(
         #    3, curr_dim, next_dim, curr_mod,
@@ -239,6 +260,8 @@ class kp_module(nn.Module):
             layer=layer, **kwargs
         )   
 
+        #self.low3 = make_hg_layer_revr(kernel = 3, mod = curr_mod, dim0 = next_dim, dim1 = curr_dim, nDenselayer = 1)                  # RDB here
+
         self.up2  = make_unpool_layer(curr_dim)
 
         self.merge = make_merge_layer(curr_dim)
@@ -246,10 +269,63 @@ class kp_module(nn.Module):
     def forward(self, x):
         up1  = self.up1(x)
         max1 = self.max1(x)
+
+        ##### See Feature Map Here #####
+        feature_map = max1.cpu().detach().numpy()
+        print("max1 Shape:", feature_map.shape)
+        feature_map = np.sum(feature_map[0], axis = 0)
+        plt.imshow(feature_map/feature_map[1])
+        plt.show()
+        ################################
+
         low1 = self.low1(max1)
+
+        ##### See Feature Map Here #####
+        feature_map = low1.cpu().detach().numpy()
+        print("low1 Shape:", feature_map.shape)
+        feature_map = np.sum(feature_map[0], axis = 0)
+        plt.imshow(feature_map/feature_map[1])
+        plt.show()
+        ################################
+
         low2 = self.low2(low1)
+
+        ##### See Feature Map Here #####
+        feature_map = low2.cpu().detach().numpy()
+        print("low2 Shape:", feature_map.shape)
+        feature_map = np.sum(feature_map[0], axis = 0)
+        plt.imshow(feature_map/feature_map[1])
+        plt.show()
+        ################################
+
         low3 = self.low3(low2)
+
+        ##### See Feature Map Here #####
+        feature_map = low3.cpu().detach().numpy()
+        print("low3 Shape:", feature_map.shape)
+        feature_map = np.sum(feature_map[0], axis = 0)
+        plt.imshow(feature_map/feature_map[1])
+        plt.show()
+        ################################
+
         up2  = self.up2(low3)
+
+        ##### See Feature Map Here #####
+        feature_map = up2.cpu().detach().numpy()
+        print("up2 Shape:", feature_map.shape)
+        feature_map = np.sum(feature_map[0], axis = 0)
+        plt.imshow(feature_map/feature_map[1])
+        plt.show()
+        ################################
+
+        ##### See Feature Map Here #####
+        feature_map = self.merge(up1, up2).cpu().detach().numpy()
+        print("merged Shape:", feature_map.shape)
+        feature_map = np.sum(feature_map[0], axis = 0)
+        plt.imshow(feature_map/feature_map[1])
+        plt.show()
+        ################################
+        
         return self.merge(up1, up2)
 
 class exkp(nn.Module):
@@ -331,6 +407,14 @@ class exkp(nn.Module):
 
     def forward(self, image):
         # print('image shape', image.shape)
+
+        ##### See Feature Map Here #####
+        input = image.cpu().detach().numpy()
+        input = np.sum(input[0], axis = 0)
+        plt.imshow(input/input[1])
+        plt.show()
+        ################################
+
         inter = self.pre(image)
         outs  = []
 
