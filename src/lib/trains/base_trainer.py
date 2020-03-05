@@ -72,7 +72,6 @@ class BaseTrainer(object):
         self.optimizer.zero_grad()
         loss.backward()
         self.optimizer.step()
-        iteration = iteration + 1
       batch_time.update(time.time() - end)
       end = time.time()
 
@@ -84,6 +83,7 @@ class BaseTrainer(object):
           loss_stats[l].mean().item(), batch['input'].size(0))
 
         if phase == 'train':
+          iteration = iteration + 1
           tb.add_scalar('Train ' + str(l) + ' vs Iteration', avg_loss_stats[l].avg, iteration)
         else:
           tb.add_scalar('Validation ' + str(l) + ' vs Epoch', avg_loss_stats[l].avg, epoch)
