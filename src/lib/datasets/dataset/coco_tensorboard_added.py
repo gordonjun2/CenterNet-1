@@ -12,6 +12,7 @@ import torch.utils.data as data
 
 class COCO_tensorboard_added(data.Dataset):
   num_classes = 80
+  #num_classes = 20
   default_resolution = [512, 512]
   mean = np.array([0.40789654, 0.44719302, 0.47026115],
                    dtype=np.float32).reshape(1, 1, 3)
@@ -22,6 +23,7 @@ class COCO_tensorboard_added(data.Dataset):
     super(COCO_tensorboard_added, self).__init__()
     self.data_dir = os.path.join(opt.data_dir, 'coco')
     self.img_dir = os.path.join(self.data_dir, '{}2017'.format(split))
+    #self.img_dir = os.path.join(self.data_dir, 'VOC2012_{}'.format(split))
     if split == 'test':
       self.annot_path = os.path.join(
           self.data_dir, 'annotations', 
@@ -35,6 +37,9 @@ class COCO_tensorboard_added(data.Dataset):
         self.annot_path = os.path.join(
           self.data_dir, 'annotations', 
           'instances_{}2017.json').format(split)
+        # self.annot_path = os.path.join(
+        #   self.data_dir, 'annotations', 
+        #   'VOC2012_{}.json').format(split)
     self.max_objs = 128
     self.class_name = [
       '__background__', 'person', 'bicycle', 'car', 'motorcycle', 'airplane',
@@ -50,6 +55,11 @@ class COCO_tensorboard_added(data.Dataset):
       'laptop', 'mouse', 'remote', 'keyboard', 'cell phone', 'microwave',
       'oven', 'toaster', 'sink', 'refrigerator', 'book', 'clock', 'vase',
       'scissors', 'teddy bear', 'hair drier', 'toothbrush']
+    # self.class_name = ['__background__', "aeroplane", "bicycle", "bird", "boat",
+    #                   "bottle", "bus", "car", "cat", "chair",
+    #                   "cow", "diningtable", "dog", "horse",
+    #                   "motorbike", "person", "pottedplant",
+    #                   "sheep", "sofa", "train", "tvmonitor"]
     self._valid_ids = [
       1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 
       14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 
@@ -59,6 +69,7 @@ class COCO_tensorboard_added(data.Dataset):
       58, 59, 60, 61, 62, 63, 64, 65, 67, 70, 
       72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 
       82, 84, 85, 86, 87, 88, 89, 90]
+    #self._valid_ids = np.arange(self.num_classes, dtype=np.int32)
     self.cat_ids = {v: i for i, v in enumerate(self._valid_ids)}
     self.voc_color = [(v // 32 * 64 + 64, (v // 8) % 4 * 64, v % 8 * 32) \
                       for v in range(1, self.num_classes + 1)]
@@ -76,9 +87,11 @@ class COCO_tensorboard_added(data.Dataset):
     self.split = split
     self.opt = opt
 
-    print('==> initializing coco 2017 {} data.'.format(split))
+    # print('==> initializing coco 2017 {} data.'.format(split))
+    print('==> initializing PASCAL VOC2012 {} data.'.format(split))
     self.coco = coco.COCO(self.annot_path)
     self.images = self.coco.getImgIds()
+    #self.images = os.listdir('/home/coffeemix/Desktop/Gordon/CenterNet-1/data/coco/VOC2012_train')
     self.num_samples = len(self.images)
 
     print('Loaded {} {} samples'.format(split, self.num_samples))
