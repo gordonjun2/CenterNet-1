@@ -171,59 +171,59 @@ class kp_module(nn.Module):
         max1 = self.max1(x)
 
         ##### See Feature Map Here #####
-        feature_map = max1.cpu().detach().numpy()
-        print("max1 Shape:", feature_map.shape)
-        feature_map = np.sum(feature_map[0], axis = 0)
-        plt.imshow(feature_map/feature_map[1])
-        plt.show()
+        # feature_map = max1.cpu().detach().numpy()
+        # print("max1 Shape:", feature_map.shape)
+        # feature_map = np.sum(feature_map[0], axis = 0)
+        # plt.imshow(feature_map/feature_map[1])
+        # plt.show()
         ################################
 
         low1 = self.low1(max1)
 
         ##### See Feature Map Here #####
-        feature_map = low1.cpu().detach().numpy()
-        print("low1 Shape:", feature_map.shape)
-        feature_map = np.sum(feature_map[0], axis = 0)
-        plt.imshow(feature_map/feature_map[1])
-        plt.show()
+        # feature_map = low1.cpu().detach().numpy()
+        # print("low1 Shape:", feature_map.shape)
+        # feature_map = np.sum(feature_map[0], axis = 0)
+        # plt.imshow(feature_map/feature_map[1])
+        # plt.show()
         ################################
 
         low2 = self.low2(low1)
 
         ##### See Feature Map Here #####
-        feature_map = low2.cpu().detach().numpy()
-        print("low2 Shape:", feature_map.shape)
-        feature_map = np.sum(feature_map[0], axis = 0)
-        plt.imshow(feature_map/feature_map[1])
-        plt.show()
+        # feature_map = low2.cpu().detach().numpy()
+        # print("low2 Shape:", feature_map.shape)
+        # feature_map = np.sum(feature_map[0], axis = 0)
+        # plt.imshow(feature_map/feature_map[1])
+        # plt.show()
         ################################
 
         low3 = self.low3(low2)
 
         ##### See Feature Map Here #####
-        feature_map = low3.cpu().detach().numpy()
-        print("low3 Shape:", feature_map.shape)
-        feature_map = np.sum(feature_map[0], axis = 0)
-        plt.imshow(feature_map/feature_map[1])
-        plt.show()
+        # feature_map = low3.cpu().detach().numpy()
+        # print("low3 Shape:", feature_map.shape)
+        # feature_map = np.sum(feature_map[0], axis = 0)
+        # plt.imshow(feature_map/feature_map[1])
+        # plt.show()
         ################################
 
         up2  = self.up2(low3)
 
         ##### See Feature Map Here #####
-        feature_map = up2.cpu().detach().numpy()
-        print("up2 Shape:", feature_map.shape)
-        feature_map = np.sum(feature_map[0], axis = 0)
-        plt.imshow(feature_map/feature_map[1])
-        plt.show()
+        # feature_map = up2.cpu().detach().numpy()
+        # print("up2 Shape:", feature_map.shape)
+        # feature_map = np.sum(feature_map[0], axis = 0)
+        # plt.imshow(feature_map/feature_map[1])
+        # plt.show()
         ################################
 
         ##### See Feature Map Here #####
-        feature_map = self.merge(up1, up2).cpu().detach().numpy()
-        print("merged Shape:", feature_map.shape)
-        feature_map = np.sum(feature_map[0], axis = 0)
-        plt.imshow(feature_map/feature_map[1])
-        plt.show()
+        # feature_map = self.merge(up1, up2).cpu().detach().numpy()
+        # print("merged Shape:", feature_map.shape)
+        # feature_map = np.sum(feature_map[0], axis = 0)
+        # plt.imshow(feature_map/feature_map[1])
+        # plt.show()
         ################################
 
         return self.merge(up1, up2)
@@ -309,10 +309,10 @@ class exkp(nn.Module):
         # print('image shape', image.shape)
 
         ##### See Feature Map Here #####
-        input = image.cpu().detach().numpy()
-        input = np.sum(input[0], axis = 0)
-        plt.imshow(input/input[1])
-        plt.show()
+        # input = image.cpu().detach().numpy()
+        # input = np.sum(input[0], axis = 0)
+        # plt.imshow(input/input[1])
+        # plt.show()
         ################################
 
         inter = self.pre(image)
