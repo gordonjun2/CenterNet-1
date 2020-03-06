@@ -12,14 +12,11 @@ services:
       memlock: -1
       stack: 67108864
     volumes:
-      - /tmp/.X11-unix:/tmp/.X11-unix:ro
       - ./data/coco:/home/root/CenterNet-1/data/coco
       - ./exp:/home/root/CenterNet-1/exp
       - ./src/runs:/home/root/CenterNet-1/src/runs
       - ./models:/home/root/CenterNet-1/models
     environment:
-      - DISPLAY=$DISPLAY
       - NVIDIA_VISIBLE_DEVICES=all
-      - QT_X11_NO_MITSHM=1
     pid: "host"
 

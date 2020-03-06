@@ -56,12 +56,6 @@ RUN python3 setup.py build_ext install
 
 # CUDA Setting
 ENV FORCE_CUDA="0"
-ENV CUDA_VISIBLE_DEVICES=0
+#ENV CUDA_VISIBLE_DEVICES=0
 
 WORKDIR /home/root/CenterNet-1/src/lib/models/networks/DCNv2
-
-RUN ./make.sh
-
-WORKDIR /home/root/CenterNet-1
-
-
