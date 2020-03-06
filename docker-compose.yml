@@ -16,6 +16,7 @@ services:
       - ./data/coco:/home/root/CenterNet-1/data/coco
       - ./exp:/home/root/CenterNet-1/exp
       - ./src/runs:/home/root/CenterNet-1/src/runs
+      - ./models:/home/root/CenterNet-1/models
     environment:
       - DISPLAY=$DISPLAY
       - NVIDIA_VISIBLE_DEVICES=all

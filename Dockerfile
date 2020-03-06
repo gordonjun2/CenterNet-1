@@ -45,17 +45,22 @@ RUN sudo wget https://anaconda.org/anaconda/cudatoolkit/10.1.243/download/linux-
     sudo tar -xjf cudatoolkit-10.1.243-h6bb024c_0.tar.bz2 -C /usr/bin && \
     sudo rm cudatoolkit-10.1.243-h6bb024c_0.tar.bz2
 
+WORKDIR /home/src/lib/external
+
+RUN make
+
 WORKDIR /home/root/CenterNet-1/cocoapi/PythonAPI
 
-RUN python3 setup.py build_ext --inplace
+RUN python3 setup.py build_ext install
+
+# CUDA Setting
+ENV FORCE_CUDA="0"
+ENV CUDA_VISIBLE_DEVICES=0
 
 WORKDIR /home/root/CenterNet-1/src/lib/models/networks/DCNv2
 
 RUN ./make.sh
 
 WORKDIR /home/root/CenterNet-1
-
-# CUDA Setting
-ENV FORCE_CUDA="0"
 
 
