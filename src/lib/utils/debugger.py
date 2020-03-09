@@ -45,6 +45,12 @@ class Debugger(object):
       self.names = coco_class_name
     elif num_classes == 20 or dataset == 'pascal':
       self.names = pascal_class_name
+
+    elif num_classes == 80 or dataset == 'coco_tensorboard_added':
+      self.names = coco_class_name
+    elif num_classes == 20 or dataset == 'pascal_coco_tensorboard_added':
+      self.names = pascal_class_name
+
     elif dataset == 'gta':
       self.names = gta_class_name
       self.focal_length = 935.3074360871937

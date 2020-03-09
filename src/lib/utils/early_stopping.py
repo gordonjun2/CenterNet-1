@@ -34,17 +34,23 @@ class EarlyStopping:
         if self.best_score is None:
             self.best_score = score
             dir = self.save_checkpoint(val_loss, model, epoch, arch, task, lr_step)
+
+            return dir
+
         elif score < self.best_score + self.delta:
             self.counter += 1
             print(f'EarlyStopping counter: {self.counter} out of {self.patience}')
             if self.counter >= self.patience:
                 self.early_stop = True
+
+            return None
+
         else:
             self.best_score = score
             dir = self.save_checkpoint(val_loss, model, epoch, arch, task, lr_step)
             self.counter = 0
 
-        return dir
+            return dir
 
     def save_checkpoint(self, val_loss, model, epoch, arch, task, lr_step, es = True):
         '''Saves model when validation loss decrease.'''

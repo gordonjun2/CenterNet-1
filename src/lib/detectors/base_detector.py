@@ -23,8 +23,10 @@ class BaseDetector(object):
     print('Creating model...')
     self.model = create_model(opt.arch, opt.heads, opt.head_conv)
     if len(opt.load_model) != 0:
+      print("Testing")
       self.model = load_model(self.model, opt.load_model)
     else:
+      print("Testing while training")
       self.model = load_model(self.model, best_model_dir)
     self.model = self.model.to(opt.device)
     self.model.eval()
