@@ -101,7 +101,7 @@ def main(opt, tb):
             best = log_dict_val[opt.metric]
             best_model_dir = save_checkpoint(best, model, epoch, opt.arch, opt.task, opt.lr_step, es = False)
 
-        if epoch % 1 == 0:
+        if epoch % 2 == 0:
           best_model_dir = os.path.join(os.getcwd(), "..", "exp", best_model_dir)
           stats = test(opt, best_model_dir, tb)
           print(stats[0])
