@@ -92,8 +92,10 @@ def main(opt, tb):
 
         if opt.es:
           dir = early_stopping(log_dict_val[opt.metric], model, epoch, opt.arch, opt.task, opt.lr_step)
-          if len(dir) != 0:
-              best_model_dir = dir
+          if dir == None:
+            best_model_dir = best_model_dir
+          else:
+            best_model_dir = dir
         else:
           if log_dict_val[opt.metric] < best:
             best = log_dict_val[opt.metric]
@@ -135,8 +137,6 @@ def main(opt, tb):
       #  best = log_dict_val[opt.metric]
       #  save_model(os.path.join(opt.save_dir, 'model_best.pth'), 
       #             epoch, model)
-
-
 
     else:
       save_model(os.path.join(opt.save_dir, 'model_last.pth'), 

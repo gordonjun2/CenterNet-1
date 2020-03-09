@@ -79,11 +79,13 @@ def prefetch_test(opt):
   bar.finish()
   dataset.run_eval(results, opt.save_dir)
 
-def test(opt, best_model_dir, tb = None):
+def test(opt, best_model_dir = None, tb = None):
   os.environ['CUDA_VISIBLE_DEVICES'] = opt.gpus_str
   
-  if opt.dataset == 'coco' and tb is not None:
+  if opt.dataset == 'coco_tensorboard_added' and tb is not None:
     Dataset = dataset_factory['coco_tensorboard_added']
+  elif opt.dataset == 'pascal_coco_tensorboard_added' and tb is not None:
+    Dataset = dataset_factory['pascal_coco_tensorboard_added']
   else:
     Dataset = dataset_factory[opt.dataset]
 
@@ -95,7 +97,11 @@ def test(opt, best_model_dir, tb = None):
   split = 'val' if not opt.trainval else 'test'
   dataset = Dataset(opt, split)
   print(best_model_dir)
-  detector = Detector(opt, best_model_dir)
+
+  if best_model_dir == None:
+    detector = Detector(opt)
+  else:
+    detector = Detector(opt, best_model_dir)
 
   results = {}
   num_iters = len(dataset)
@@ -106,6 +112,9 @@ def test(opt, best_model_dir, tb = None):
     img_id = dataset.images[ind]
     img_info = dataset.coco.loadImgs(ids=[img_id])[0]
     img_path = os.path.join(dataset.img_dir, img_info['file_name'])
+
+    print("Img Path")
+    print(img_path)
 
     if opt.task == 'ddd':
       ret = detector.run(img_path, img_info['calib'])
