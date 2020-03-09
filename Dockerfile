@@ -22,7 +22,6 @@ RUN ln -sfn /usr/bin/python3.6 /usr/bin/python3 && ln -sfn /usr/bin/python3 /usr
 #RUN useradd -m --no-log-init --system  --uid ${USER_ID} appuser -g sudo
 #RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 USER root
-WORKDIR /home/root
 
 ENV PATH="/home/root/.local/bin:${PATH}"
 RUN wget https://bootstrap.pypa.io/get-pip.py && \
@@ -33,6 +32,8 @@ RUN wget https://bootstrap.pypa.io/get-pip.py && \
 RUN apt-get update && apt-get install -y \
     libsm6 libxrender1 libfontconfig1 python3.6-tk && \
     rm -rf /var/lib/apt/lists/*
+
+WORKDIR /home/root
 
 RUN sudo git clone https://github.com/gordonjun2/CenterNet-1.git /home/root/CenterNet-1
 
@@ -52,9 +53,5 @@ RUN make
 WORKDIR /home/root/CenterNet-1/cocoapi/PythonAPI
 
 RUN python3 setup.py build_ext install
-
-# CUDA Setting
-ENV FORCE_CUDA="0"
-ENV CUDA_VISIBLE_DEVICES=0
 
 WORKDIR /home/root/CenterNet-1/src/lib/models/networks/DCNv2
