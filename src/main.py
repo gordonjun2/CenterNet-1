@@ -72,7 +72,7 @@ def main(opt, tb):
   best = 1e10
 
   if opt.es:
-    early_stopping = EarlyStopping(patience=10, verbose=True)
+    early_stopping = EarlyStopping(patience=20, verbose=True)
   
   best_model_dir = None
   iteration = 0
@@ -101,34 +101,34 @@ def main(opt, tb):
             best = log_dict_val[opt.metric]
             best_model_dir = save_checkpoint(best, model, epoch, opt.arch, opt.task, opt.lr_step, es = False)
 
-        if epoch % 2 == 0:
-          best_model_dir = os.path.join(os.getcwd(), "..", "exp", best_model_dir)
-          stats = test(opt, best_model_dir, tb)
-          print(stats[0])
-          map_avg = stats[0]
-          map_50 = stats[1]
-          map_75 = stats[2]
-          map_small = stats[3]
-          map_medium = stats[4]
-          map_large = stats[5]
-          mar_1 = stats[6]
-          mar_10 = stats[7]
-          mar_100 = stats[8]
-          mar_small = stats[9]
-          mar_medium = stats[10]
-          mar_large = stats[11]
-          tb.add_scalar('Average mAP vs Epoch', map_avg, epoch)
-          tb.add_scalar('mAP (IoU 0.5) vs Epoch', map_50, epoch)
-          tb.add_scalar('mAP (IoU 0.75) vs Epoch', map_75, epoch)
-          tb.add_scalar('mAP (Area = Small) vs Epoch', map_small, epoch)
-          tb.add_scalar('mAP (Area = Medium) vs Epoch', map_medium, epoch)
-          tb.add_scalar('mAP (Area = Large) vs Epoch', map_large, epoch)
-          tb.add_scalar('mAR (Max Detection = 1) vs Epoch', mar_1, epoch)
-          tb.add_scalar('mAR (Max Detection = 10) vs Epoch', mar_10, epoch)
-          tb.add_scalar('mAR (Max Detection = 100) vs Epoch', mar_100, epoch)
-          tb.add_scalar('mAR (Area = Small) vs Epoch', mar_small, epoch)
-          tb.add_scalar('mAR (Area = Medium) vs Epoch', mar_medium, epoch)
-          tb.add_scalar('mAR (Area = Large) vs Epoch', mar_large, epoch)
+        # if epoch % 2 == 0:
+        #   best_model_dir = os.path.join(os.getcwd(), "..", "exp", best_model_dir)
+        #   stats = test(opt, best_model_dir, tb)
+        #   print(stats[0])
+        #   map_avg = stats[0]
+        #   map_50 = stats[1]
+        #   map_75 = stats[2]
+        #   map_small = stats[3]
+        #   map_medium = stats[4]
+        #   map_large = stats[5]
+        #   mar_1 = stats[6]
+        #   mar_10 = stats[7]
+        #   mar_100 = stats[8]
+        #   mar_small = stats[9]
+        #   mar_medium = stats[10]
+        #   mar_large = stats[11]
+        #   tb.add_scalar('Average mAP vs Epoch', map_avg, epoch)
+        #   tb.add_scalar('mAP (IoU 0.5) vs Epoch', map_50, epoch)
+        #   tb.add_scalar('mAP (IoU 0.75) vs Epoch', map_75, epoch)
+        #   tb.add_scalar('mAP (Area = Small) vs Epoch', map_small, epoch)
+        #   tb.add_scalar('mAP (Area = Medium) vs Epoch', map_medium, epoch)
+        #   tb.add_scalar('mAP (Area = Large) vs Epoch', map_large, epoch)
+        #   tb.add_scalar('mAR (Max Detection = 1) vs Epoch', mar_1, epoch)
+        #   tb.add_scalar('mAR (Max Detection = 10) vs Epoch', mar_10, epoch)
+        #   tb.add_scalar('mAR (Max Detection = 100) vs Epoch', mar_100, epoch)
+        #   tb.add_scalar('mAR (Area = Small) vs Epoch', mar_small, epoch)
+        #   tb.add_scalar('mAR (Area = Medium) vs Epoch', mar_medium, epoch)
+        #   tb.add_scalar('mAR (Area = Large) vs Epoch', mar_large, epoch)
 
       for k, v in log_dict_val.items():
         logger.scalar_summary('val_{}'.format(k), v, epoch)
