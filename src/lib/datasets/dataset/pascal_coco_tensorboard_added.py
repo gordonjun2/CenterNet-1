@@ -22,7 +22,7 @@ class PASCAL_COCO_tensorboard_added(data.Dataset):
     super(PASCAL_COCO_tensorboard_added, self).__init__()
     self.data_dir = os.path.join(opt.data_dir, 'voc_coco')
     self.img_dir = os.path.join(self.data_dir, 'images', 'JPEGImages')
-    _ann_name = {'train': 'train2012', 'val': 'val2012'}
+    _ann_name = {'train': 'trainval2012', 'val': 'test2007'}
     self.annot_path = os.path.join(
       self.data_dir, 'annotations', 
       'pascal_{}.json').format(_ann_name[split])

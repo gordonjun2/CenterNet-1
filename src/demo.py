@@ -26,7 +26,7 @@ def demo(opt):
     detector.pause = False
     while True:
         _, img = cam.read()
-        cv2.imshow('input', img)
+        #cv2.imshow('input', img)
         ret = detector.run(img)
         time_str = ''
         for stat in time_stats:

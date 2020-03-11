@@ -174,7 +174,7 @@ class Debugger(object):
       cv2.circle(self.imgs[img_id], (rect1[0], rect2[1]), int(10 * conf), c, 1)
       cv2.circle(self.imgs[img_id], (rect2[0], rect1[1]), int(10 * conf), c, 1)
 
-  def add_coco_bbox(self, bbox, cat, conf=1, show_txt=True, img_id='default'): 
+  def add_coco_bbox(self, bbox, cat, tot_time, conf=1, show_txt=True, img_id='default'): 
     bbox = np.array(bbox, dtype=np.int32)
     # cat = (int(cat) + 1) % 80
     cat = int(cat)
@@ -193,6 +193,11 @@ class Debugger(object):
                     (bbox[0] + cat_size[0], bbox[1] - 2), c, -1)
       cv2.putText(self.imgs[img_id], txt, (bbox[0], bbox[1] - 2), 
                   font, 0.5, (0, 0, 0), thickness=1, lineType=cv2.LINE_AA)
+      #infer_text = 'Inference Time per Frame: {:0.2f} ms'.format(infer_time * 1000)
+      #cv2.putText(self.imgs[img_id], infer_text, (10, 30), self.font, self.fontScale * 0.75, (0, 0, 255), self.indFontThickness) 
+
+      #if save:
+      #  cv2.imwrite('./To_Convert/' + str(frame_count) + ".jpg", self.imgs[img_id])
 
   def add_coco_hp(self, points, img_id='default'): 
     points = np.array(points, dtype=np.int32).reshape(self.num_joints, 2)
