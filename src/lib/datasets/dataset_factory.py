@@ -6,6 +6,7 @@ from .sample.ddd import DddDataset
 from .sample.exdet import EXDetDataset
 from .sample.ctdet import CTDetDataset
 from .sample.multi_pose import MultiPoseDataset
+from .sample.ctdet_drone import CTDetDatasetDrone
 
 from .dataset.coco import COCO
 from .dataset.coco_tensorboard_added import COCO_tensorboard_added
@@ -13,6 +14,7 @@ from .dataset.pascal_coco_tensorboard_added import PASCAL_COCO_tensorboard_added
 from .dataset.pascal import PascalVOC
 from .dataset.kitti import KITTI
 from .dataset.coco_hp import COCOHP
+from .dataset.visdrone import VISDRONE
 
 
 dataset_factory = {
@@ -21,14 +23,16 @@ dataset_factory = {
   'pascal_coco_tensorboard_added': PASCAL_COCO_tensorboard_added,
   'pascal': PascalVOC,
   'kitti': KITTI,
-  'coco_hp': COCOHP
+  'coco_hp': COCOHP,
+  'visdrone': VISDRONE
 }
 
 _sample_factory = {
   'exdet': EXDetDataset,
   'ctdet': CTDetDataset,
   'ddd': DddDataset,
-  'multi_pose': MultiPoseDataset
+  'multi_pose': MultiPoseDataset,
+  'ctdet_drone': CTDetDatasetDrone
 }
 
 

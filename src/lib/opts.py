@@ -351,6 +351,9 @@ class opts(object):
       'ddd': {'default_resolution': [384, 1280], 'num_classes': 3, 
                 'mean': [0.485, 0.456, 0.406], 'std': [0.229, 0.224, 0.225],
                 'dataset': 'kitti'},
+      'ctdet_drone': {'default_resolution': [512, 512], 'num_classes': 2,
+                'mean': [0.408, 0.447, 0.470], 'std': [0.289, 0.274, 0.278],
+                'dataset': 'visdrone'},
     }
     class Struct:
       def __init__(self, entries):

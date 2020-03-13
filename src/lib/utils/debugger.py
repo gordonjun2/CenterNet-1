@@ -51,6 +51,9 @@ class Debugger(object):
     elif num_classes == 20 or dataset == 'pascal_coco_tensorboard_added':
       self.names = pascal_class_name
 
+    elif num_classes == 2 or dataset == 'visdrone':
+      self.names = visdrone_class_name
+
     elif dataset == 'gta':
       self.names = gta_class_name
       self.focal_length = 935.3074360871937
@@ -466,6 +469,8 @@ coco_class_name = [
      'oven', 'toaster', 'sink', 'refrigerator', 'book', 'clock', 'vase',
      'scissors', 'teddy bear', 'hair drier', 'toothbrush'
 ]
+
+visdrone_class_name = ['people']
 
 color_list = np.array(
         [
