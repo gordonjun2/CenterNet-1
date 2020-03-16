@@ -329,6 +329,13 @@ class opts(object):
         opt.heads.update({'hm_hp': 17})
       if opt.reg_hp_offset:
         opt.heads.update({'hp_offset': 2})
+    elif opt.task == 'ctdet_drone':
+      opt.heads = {'hm': opt.num_classes,
+                   'wh': 2 if not opt.cat_spec_wh else 2 * opt.num_classes}
+      
+      if opt.reg_offset:
+        opt.heads.update({'reg': 2})
+
     else:
       assert 0, 'task not defined!'
     print('heads', opt.heads)

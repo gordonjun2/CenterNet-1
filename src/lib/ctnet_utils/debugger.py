@@ -45,15 +45,8 @@ class Debugger(object):
       self.names = coco_class_name
     elif num_classes == 20 or dataset == 'pascal':
       self.names = pascal_class_name
-
-    elif num_classes == 80 or dataset == 'coco_tensorboard_added':
-      self.names = coco_class_name
-    elif num_classes == 20 or dataset == 'pascal_coco_tensorboard_added':
-      self.names = pascal_class_name
-
     elif num_classes == 2 or dataset == 'visdrone':
       self.names = visdrone_class_name
-
     elif dataset == 'gta':
       self.names = gta_class_name
       self.focal_length = 935.3074360871937
@@ -84,7 +77,7 @@ class Debugger(object):
   
   def add_mask(self, mask, bg, imgId = 'default', trans = 0.8):
     self.imgs[imgId] = (mask.reshape(
-      mask.shape[0], mask.shape[1], 1) * 255 * trans + 
+      mask.shape[0], mask.shape[1], 1) * 255 * trans +
       bg * (1 - trans)).astype(np.uint8)
   
   def show_img(self, pause = False, imgId = 'default'):
@@ -177,7 +170,7 @@ class Debugger(object):
       cv2.circle(self.imgs[img_id], (rect1[0], rect2[1]), int(10 * conf), c, 1)
       cv2.circle(self.imgs[img_id], (rect2[0], rect1[1]), int(10 * conf), c, 1)
 
-  def add_coco_bbox(self, bbox, cat, tot_time, conf=1, show_txt=True, img_id='default'): 
+  def add_coco_bbox(self, bbox, cat, conf=1, show_txt=True, img_id='default'): 
     bbox = np.array(bbox, dtype=np.int32)
     # cat = (int(cat) + 1) % 80
     cat = int(cat)
@@ -185,6 +178,7 @@ class Debugger(object):
     c = self.colors[cat][0][0].tolist()
     if self.theme == 'white':
       c = (255 - np.array(c)).tolist()
+    # self.names[cat] gives label name
     txt = '{}{:.1f}'.format(self.names[cat], conf)
     font = cv2.FONT_HERSHEY_SIMPLEX
     cat_size = cv2.getTextSize(txt, font, 0.5, 2)[0]
@@ -196,11 +190,6 @@ class Debugger(object):
                     (bbox[0] + cat_size[0], bbox[1] - 2), c, -1)
       cv2.putText(self.imgs[img_id], txt, (bbox[0], bbox[1] - 2), 
                   font, 0.5, (0, 0, 0), thickness=1, lineType=cv2.LINE_AA)
-      #infer_text = 'Inference Time per Frame: {:0.2f} ms'.format(infer_time * 1000)
-      #cv2.putText(self.imgs[img_id], infer_text, (10, 30), self.font, self.fontScale * 0.75, (0, 0, 255), self.indFontThickness) 
-
-      #if save:
-      #  cv2.imwrite('./To_Convert/' + str(frame_count) + ".jpg", self.imgs[img_id])
 
   def add_coco_hp(self, points, img_id='default'): 
     points = np.array(points, dtype=np.int32).reshape(self.num_joints, 2)
@@ -229,7 +218,10 @@ class Debugger(object):
   def show_all_imgs(self, pause=False, time=0):
     if not self.ipynb:
       for i, v in self.imgs.items():
-        cv2.imshow('{}'.format(i), v)
+        # cv2.imshow('{}'.format(i), v)
+        show_win_name = '{}'.format(i)
+        cv2.namedWindow(show_win_name, cv2.WINDOW_NORMAL)
+        cv2.imshow(show_win_name, v)
       if cv2.waitKey(0 if pause else 1) == 27:
         import sys
         sys.exit(0)

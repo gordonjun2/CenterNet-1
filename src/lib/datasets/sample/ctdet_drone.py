@@ -23,7 +23,7 @@ class CTDetDatasetDrone(data.Dataset):
 
   def _get_annotation(self, name):
     try:
-      ann_df = pd.read_csv("../../../../data/visdrone/drone_data_compiled/training_labels/{}.txt".format(name), sep="\n", header=None)
+      ann_df = pd.read_csv("../data/visdrone/drone_data_compiled/training_labels/{}.txt".format(name), sep="\n", header=None)
       num_objs = min(len(ann_df), self.max_objs)
       anns = []
       for i in range(num_objs):
@@ -42,7 +42,7 @@ class CTDetDatasetDrone(data.Dataset):
 
   # rushed code can be imprvoed
   def _get_annotation_val(self, name):
-    ann_df = pd.read_csv("../../../../data/visdrone/drone_data_compiled/validate_labels/{}.txt".format(name), sep="\n", header=None)
+    ann_df = pd.read_csv("../data/visdrone/drone_data_compiled/validate_labels/{}.txt".format(name), sep="\n", header=None)
     num_objs = min(len(ann_df), self.max_objs)
     anns = []
     for i in range(num_objs):
@@ -70,13 +70,13 @@ class CTDetDatasetDrone(data.Dataset):
     if self.split == 'val':
       file_name = img_path.split(".")[0]  # remove jpg/png
       anns, num_objs = self._get_annotation_val(file_name)
-      img_path = "/media/dh/Data/drone_data_compiled/validate_images/" + img_path
+      img_path = "../data/visdrone/drone_data_compiled/validate_images/" + img_path
       img = cv2.imread(img_path)
 
     elif self.split == 'train':
       file_name = img_path.split(".")[0]  # remove jpg/png
       anns, num_objs = self._get_annotation(file_name)
-      img_path = "/media/dh/Data/drone_data_compiled/training_images/" + img_path
+      img_path = "../data/visdrone/drone_data_compiled/training_images/" + img_path
       img = cv2.imread(img_path)
 
     height, width = img.shape[0], img.shape[1]

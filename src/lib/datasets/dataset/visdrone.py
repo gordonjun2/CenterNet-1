@@ -61,12 +61,13 @@ class VISDRONE(data.Dataset):
         #hard-code
 
         #self.images = os.listdir('drone_data_compiled/training_images')
-        self.images = os.path.join(opt.data_dir, 'visdrone', 'drone_data_compiled', 'training_images')
+        self.images = os.listdir("/home/coffeemix/Desktop/Gordon/CenterNet-1/data/visdrone/drone_data_compiled/training_images")
+        print(self.images)
         self.num_samples = len(self.images)
 
         if split == 'val':
             #self.images = os.listdir('/media/dh/Data/drone_data_compiled/validate_images')
-            self.images = os.path.join(opt.data_dir, 'visdrone', 'drone_data_compiled', 'validate_images')
+            self.images = os.listdir("/home/coffeemix/Desktop/Gordon/CenterNet-1/data/visdrone/drone_data_compiled/validate_images")
             self.num_samples = len(self.images)
 
         print('Loaded {} {} samples'.format(split, self.num_samples))
