@@ -19,6 +19,8 @@ from utils.utils import AverageMeter
 from datasets.dataset_factory import dataset_factory
 from detectors.detector_factory import detector_factory
 
+from datasets.dataset.visdrone import VISDRONE
+
 class PrefetchDataset(torch.utils.data.Dataset):
   def __init__(self, opt, dataset, pre_process_func):
     self.images = dataset.images
@@ -68,7 +70,10 @@ def prefetch_test(opt):
   avg_time_stats = {t: AverageMeter() for t in time_stats}
   for ind, (img_id, pre_processed_images) in enumerate(data_loader):
     ret = detector.run(pre_processed_images)
-    results[img_id.numpy().astype(np.int32)[0]] = ret['results']
+    if Dataset != VISDRONE:
+      results[img_id.numpy().astype(np.int32)[0]] = ret['results']
+    else:
+      results[img_id[0]] = ret['results']
     Bar.suffix = '[{0}/{1}]|Tot: {total:} |ETA: {eta:} '.format(
                    ind, num_iters, total=bar.elapsed_td, eta=bar.eta_td)
     for t in avg_time_stats:

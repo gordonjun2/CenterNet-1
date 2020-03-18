@@ -1,6 +1,8 @@
 from __future__ import division
 from __future__ import print_function
 
+import pycocotools.coco as coco
+from pycocotools.cocoeval import COCOeval
 import numpy as np
 import json
 import torch.utils.data as data
@@ -18,7 +20,7 @@ class VISDRONE(data.Dataset):
         super(VISDRONE, self).__init__()
 
         # Need to update here
-        # self.data_dir = os.path.join(opt.data_dir, 'VisDrone')
+        self.data_dir = os.path.join(opt.data_dir, 'visdrone')
         # self.img_dir = os.path.join(self.data_dir, '{}2019'.format(split))
 
         # if split == 'test':
@@ -36,7 +38,9 @@ class VISDRONE(data.Dataset):
         #             'instances_{}2017.json').format(split)
         self.max_objs = 128
         self.class_name = ['__background__', 'person']
+        #self.class_name = ['person']
         self._valid_ids = np.arange(self.num_classes, dtype=np.int32)
+        #self._valid_ids = [0]
         self.cat_ids = {v: i for i, v in enumerate(self._valid_ids)}
         self.voc_color = [(v // 32 * 64 + 64, (v // 8) % 4 * 64, v % 8 * 32) \
                           for v in range(self.num_classes)]
@@ -55,22 +59,26 @@ class VISDRONE(data.Dataset):
         self.opt = opt
 
         print('==> initializing VisDrone{} data.'.format(split))
-        # self.coco = coco.COCO(self.annot_path)
-        # self.images = self.coco.getImgIds()
 
         #hard-code
 
         #self.images = os.listdir('drone_data_compiled/training_images')
-        self.images = os.listdir("/home/coffeemix/Desktop/Gordon/CenterNet-1/data/visdrone/drone_data_compiled/training_images")
-        print(self.images)
-        self.num_samples = len(self.images)
+        self.img_dir = os.path.join("/home/coffeemix/Desktop/Gordon/CenterNet-1/data/visdrone/drone_data_compiled/training_images")
+        self.images_list = os.listdir("/home/coffeemix/Desktop/Gordon/CenterNet-1/data/visdrone/drone_data_compiled/training_images")
+        self.annot_path = os.path.join(self.data_dir, 'drone_data_compiled', 'vis_{}.json').format(split)
+        self.num_samples = len(self.images_list)
 
-        if split == 'val':
+        if split == 'val' or split == 'test':
             #self.images = os.listdir('/media/dh/Data/drone_data_compiled/validate_images')
-            self.images = os.listdir("/home/coffeemix/Desktop/Gordon/CenterNet-1/data/visdrone/drone_data_compiled/validate_images")
-            self.num_samples = len(self.images)
+            self.img_dir = os.path.join("/home/coffeemix/Desktop/Gordon/CenterNet-1/data/visdrone/drone_data_compiled/validate_images")
+            self.images_list = os.listdir("/home/coffeemix/Desktop/Gordon/CenterNet-1/data/visdrone/drone_data_compiled/validate_images")
+            self.annot_path = os.path.join(self.data_dir, 'drone_data_compiled', 'vis_{}.json').format(split)
+            self.num_samples = len(self.images_list)
 
         print('Loaded {} {} samples'.format(split, self.num_samples))
+
+        self.coco = coco.COCO(self.annot_path)
+        self.images = self.coco.getImgIds()
 
     def _to_float(self, x):
         return float("{:.2f}".format(x))
@@ -88,11 +96,12 @@ class VISDRONE(data.Dataset):
                     bbox_out = list(map(self._to_float, bbox[0:4]))
 
                     detection = {
-                        "image_id": int(image_id),
+                        "image_id": image_id,
                         "category_id": int(category_id),
                         "bbox": bbox_out,
                         "score": float("{:.2f}".format(score))
                     }
+
                     if len(bbox) > 5:
                         extreme_points = list(map(self._to_float, bbox[5:13]))
                         detection["extreme_points"] = extreme_points
@@ -111,8 +120,8 @@ class VISDRONE(data.Dataset):
         # detections  = self.convert_eval_format(results)
         # json.dump(detections, open(result_json, "w"))
         self.save_results(results, save_dir)
-        # coco_dets = self.coco.loadRes('{}/results.json'.format(save_dir))
-        # coco_eval = COCOeval(self.coco, coco_dets, "bbox")
-        # coco_eval.evaluate()
-        # coco_eval.accumulate()
-        # coco_eval.summarize()
+        coco_dets = self.coco.loadRes('{}/results.json'.format(save_dir))
+        coco_eval = COCOeval(self.coco, coco_dets, "bbox")
+        coco_eval.evaluate()
+        coco_eval.accumulate()
+        coco_eval.summarize()

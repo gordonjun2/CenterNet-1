@@ -21,38 +21,38 @@ class CTDetDatasetDrone(data.Dataset):
                     dtype=np.float32)
     return bbox
 
-  def _get_annotation(self, name):
-    try:
-      ann_df = pd.read_csv("../data/visdrone/drone_data_compiled/training_labels/{}.txt".format(name), sep="\n", header=None)
-      num_objs = min(len(ann_df), self.max_objs)
-      anns = []
-      for i in range(num_objs):
-          label = ann_df[0][i].split(',')
-          ann = {}
-          ann['bbox'] = [int(float(label[0])), int(float(label[1])), int(float(label[2])), int(float(label[3]))]
-          # Only one class
-          ann['category_id'] = 1
-          anns.append(ann)
-      return anns, num_objs
+  # def _get_annotation(self, name):
+  #   try:
+  #     ann_df = pd.read_csv("../data/visdrone/drone_data_compiled/training_labels/{}.txt".format(name), sep="\n", header=None)
+  #     num_objs = min(len(ann_df), self.max_objs)
+  #     anns = []
+  #     for i in range(num_objs):
+  #         label = ann_df[0][i].split(',')
+  #         ann = {}
+  #         ann['bbox'] = [int(float(label[0])), int(float(label[1])), int(float(label[2])), int(float(label[3]))]
+  #         # Only one class
+  #         ann['category_id'] = 1
+  #         anns.append(ann)
+  #     return anns, num_objs
 
-    except:
-      print (name, "this is name")
-      return
+  #   except:
+  #     print (name, "this is name")
+  #     return
 
 
-  # rushed code can be imprvoed
-  def _get_annotation_val(self, name):
-    ann_df = pd.read_csv("../data/visdrone/drone_data_compiled/validate_labels/{}.txt".format(name), sep="\n", header=None)
-    num_objs = min(len(ann_df), self.max_objs)
-    anns = []
-    for i in range(num_objs):
-        label = ann_df[0][i].split(',')
-        ann = {}
-        ann['bbox'] = [int(float(label[0])), int(float(label[1])), int(float(label[2])), int(float(label[3]))]
-        # Only 1 label
-        ann['category_id'] = 1
-        anns.append(ann)
-    return anns, num_objs
+  # # rushed code can be imprvoed
+  # def _get_annotation_val(self, name):
+  #   ann_df = pd.read_csv("../data/visdrone/drone_data_compiled/validate_labels/{}.txt".format(name), sep="\n", header=None)
+  #   num_objs = min(len(ann_df), self.max_objs)
+  #   anns = []
+  #   for i in range(num_objs):
+  #       label = ann_df[0][i].split(',')
+  #       ann = {}
+  #       ann['bbox'] = [int(float(label[0])), int(float(label[1])), int(float(label[2])), int(float(label[3]))]
+  #       # Only 1 label
+  #       ann['category_id'] = 1
+  #       anns.append(ann)
+  #   return anns, num_objs
 
   def _get_border(self, border, size):
     i = 1
@@ -61,23 +61,34 @@ class CTDetDatasetDrone(data.Dataset):
     return border // i
 
   def __getitem__(self, index):
-    # img_id = self.images[index]
-    img_path = self.images[index]
+    img_id = self.images[index]
+    # img_path = self.images[index]
 
     # ann_ids = self.coco.getAnnIds(imgIds=[file_name])
     # anns = self.coco.loadAnns(ids=ann_ids)
     # num_objs = min(len(anns), self.max_objs)
-    if self.split == 'val':
-      file_name = img_path.split(".")[0]  # remove jpg/png
-      anns, num_objs = self._get_annotation_val(file_name)
-      img_path = "../data/visdrone/drone_data_compiled/validate_images/" + img_path
-      img = cv2.imread(img_path)
+    # if self.split == 'val':
+      # file_name = img_path.split(".")[0]  # remove jpg/png
+      # anns, num_objs = self._get_annotation_val(file_name)
+      # img_path = "../data/visdrone/drone_data_compiled/validate_images/" + img_path
+      # img = cv2.imread(img_path)
 
-    elif self.split == 'train':
-      file_name = img_path.split(".")[0]  # remove jpg/png
-      anns, num_objs = self._get_annotation(file_name)
-      img_path = "../data/visdrone/drone_data_compiled/training_images/" + img_path
-      img = cv2.imread(img_path)
+    # elif self.split == 'train':
+      # file_name = img_path.split(".")[0]  # remove jpg/png
+      # anns, num_objs = self._get_annotation(file_name)
+      # img_path = "../data/visdrone/drone_data_compiled/training_images/" + img_path
+      # img = cv2.imread(img_path)
+
+    file_name = self.coco.loadImgs(ids=[img_id])[0]['file_name']
+    if self.split == 'train':
+      img_path = os.path.join("/home/coffeemix/Desktop/Gordon/CenterNet-1/data/visdrone/drone_data_compiled/training_images", file_name)
+    elif self.split == 'val' or self.split == 'test':
+      img_path = os.path.join("/home/coffeemix/Desktop/Gordon/CenterNet-1/data/visdrone/drone_data_compiled/validate_images", file_name)
+    ann_ids = self.coco.getAnnIds(imgIds=[img_id])
+    anns = self.coco.loadAnns(ids=ann_ids)
+    num_objs = min(len(anns), self.max_objs)
+
+    img = cv2.imread(img_path)
 
     height, width = img.shape[0], img.shape[1]
     c = np.array([img.shape[1] / 2., img.shape[0] / 2.], dtype=np.float32)

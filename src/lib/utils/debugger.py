@@ -181,6 +181,7 @@ class Debugger(object):
     bbox = np.array(bbox, dtype=np.int32)
     # cat = (int(cat) + 1) % 80
     cat = int(cat)
+    print(cat)
     # print('cat', cat, self.names[cat])
     c = self.colors[cat][0][0].tolist()
     if self.theme == 'white':
@@ -470,7 +471,7 @@ coco_class_name = [
      'scissors', 'teddy bear', 'hair drier', 'toothbrush'
 ]
 
-visdrone_class_name = ['people']
+visdrone_class_name = ['__background__', 'people']
 
 color_list = np.array(
         [
