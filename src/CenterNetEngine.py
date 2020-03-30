@@ -144,7 +144,9 @@ class CenterNetEngine(object):
                     "category_id": category_id,
                     "score": float(score)
                 }
-                det_list.append(detection)
+
+                if detection["score"] >= 0.5:
+                    det_list.append(detection)
 
         return det_list
 
