@@ -12,14 +12,13 @@ services:
       memlock: -1
       stack: 67108864
     volumes:
-      - /tmp/.X11-unix:/tmp/.X11-unix:ro
       - ./data/coco:/home/root/CenterNet-1/data/coco
+      - ./data/voc_coco:/home/root/CenterNet-1/data/voc_coco
+      - ./data/visdrone/drone_data_compiled:/media/dh/DATA4TB1/JinMing/drone_data_compiled
       - ./exp:/home/root/CenterNet-1/exp
-      - ./src/runs:/home/root/CenterNet-1/src/runs
+      - ./src:/home/root/CenterNet-1/src
       - ./models:/home/root/CenterNet-1/models
     environment:
-      - DISPLAY=$DISPLAY
       - NVIDIA_VISIBLE_DEVICES=all
-      - QT_X11_NO_MITSHM=1
     pid: "host"
 
