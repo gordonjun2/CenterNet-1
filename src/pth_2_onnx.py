@@ -30,6 +30,6 @@ opt = opts().update_dataset_info_and_set_heads(opt, Dataset)
 model = create_model(opt.arch, opt.heads, opt.head_conv)
 
 dummy_input = Variable(torch.randn(1, 3, 511, 511))
-state_dict = torch.load('../../pytorch-image-models/output-a4b4e5ce.pth')
+state_dict = torch.load('../../pytorch-image-models/help-52ad8d9f.pth')
 model.load_state_dict(state_dict)
-torch.onnx.export(model, dummy_input, "hourglass-52-resdense.onnx")
+torch.onnx.export(model, dummy_input, "help.onnx")
