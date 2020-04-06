@@ -10,9 +10,9 @@ class opts(object):
   def __init__(self):
     self.parser = argparse.ArgumentParser()
     # basic experiment setting
-    self.parser.add_argument('--task', default='ctdet',
+    self.parser.add_argument('--task', default='ctdet_drone',
                              help='ctdet | ddd | multi_pose | exdet')
-    self.parser.add_argument('--dataset', default='coco',
+    self.parser.add_argument('--dataset', default='visdrone',
                              help='coco | kitti | coco_hp | pascal | coco_tensorboard_added | pascal_coco_tensorboard_added')
     self.parser.add_argument('--exp_id', default='default')
     self.parser.add_argument('--test', action='store_true')

@@ -9,7 +9,7 @@ from CenterNetEngine import CenterNetEngine
 
 app = Flask(__name__)
 
-clf = CenterNetEngine(task = "ctdet")
+clf = CenterNetEngine(task = "ctdet_drone")
 
 @app.route("/ready", methods=["GET"])
 def check_connection():

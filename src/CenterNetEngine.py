@@ -26,40 +26,22 @@ video_ext = ['mp4', 'mov', 'avi', 'mkv']
 opt = opts().init()
 
 class CenterNetEngine(object):
-    def __init__(self, task = "ctdet"):
-        opt.load_model = "../models/ctdet_coco_hg.pth"
+    def __init__(self, task = "ctdet_drone"):
+        opt.load_model = "../exp/ctdet_drone/dla_34/model_5_1.0785181907108123.pth"
         opt.task = task
-        opt.arch = "hourglass-104"
+        opt.dataset = 'visdrone'
+        opt.arch = "dla_34"
 
         os.environ['CUDA_VISIBLE_DEVICES'] = opt.gpus_str
         opt.debug = max(opt.debug, 1)
         Detector = detector_factory[opt.task]
         self.detector = Detector(opt)
+
+        self.num_classes = opt.num_classes
+
+        self.class_name = ['__background__', 'person']
         
-        self.class_name = [
-        '__background__', 'person', 'bicycle', 'car', 'motorcycle', 'airplane',
-        'bus', 'train', 'truck', 'boat', 'traffic light', 'fire hydrant',
-        'stop sign', 'parking meter', 'bench', 'bird', 'cat', 'dog', 'horse',
-        'sheep', 'cow', 'elephant', 'bear', 'zebra', 'giraffe', 'backpack',
-        'umbrella', 'handbag', 'tie', 'suitcase', 'frisbee', 'skis',
-        'snowboard', 'sports ball', 'kite', 'baseball bat', 'baseball glove',
-        'skateboard', 'surfboard', 'tennis racket', 'bottle', 'wine glass',
-        'cup', 'fork', 'knife', 'spoon', 'bowl', 'banana', 'apple', 'sandwich',
-        'orange', 'broccoli', 'carrot', 'hot dog', 'pizza', 'donut', 'cake',
-        'chair', 'couch', 'potted plant', 'bed', 'dining table', 'toilet', 'tv',
-        'laptop', 'mouse', 'remote', 'keyboard', 'cell phone', 'microwave',
-        'oven', 'toaster', 'sink', 'refrigerator', 'book', 'clock', 'vase',
-        'scissors', 'teddy bear', 'hair drier', 'toothbrush']
-        
-        self._valid_ids = [
-        1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 
-        14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 
-        24, 25, 27, 28, 31, 32, 33, 34, 35, 36, 
-        37, 38, 39, 40, 41, 42, 43, 44, 46, 47, 
-        48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 
-        58, 59, 60, 61, 62, 63, 64, 65, 67, 70, 
-        72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 
-        82, 84, 85, 86, 87, 88, 89, 90]
+        self._valid_ids = np.arange(self.num_classes, dtype=np.int32)
 
     def show_image(self, img, score_min = 0.5, save = False):
 
@@ -131,7 +113,7 @@ class CenterNetEngine(object):
         print(all_bboxes)
         for image_id in all_bboxes:
             for cls_ind_i in range(len(all_bboxes[image_id])):
-                category_id = self.class_name[image_id]
+                category_id = self.class_name[image_id-1]
                 print(all_bboxes[image_id][cls_ind_i])
                 #for bbox in all_bboxes[image_id][cls_ind_i]:
                 all_bboxes[image_id][cls_ind_i][2] -= all_bboxes[image_id][cls_ind_i][0]
@@ -145,7 +127,7 @@ class CenterNetEngine(object):
                     "score": float(score)
                 }
 
-                if detection["score"] >= 0.5:
+                if detection["score"] >= 0.3:
                     det_list.append(detection)
 
         return det_list
